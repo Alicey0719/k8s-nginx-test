@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-test-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-test-server
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: nginx-test-server
+    spec:
+      containers:
+      - image: alicey/nginx-test:latest
+        imagePullPolicy: Always
+        name: nginx-test-server
+        ports:
+        - containerPort: 80
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: test-type
+                operator: In
+                values:
+                - sv
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-service
+spec:
+    selector:
+        app: nginx-test-server
+    ports:
+        - port: 80
+    type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-nodeport-service
+spec:
+    selector:
+        app: nginx-test-server
+    ports:
+        - port: 80
+          nodePort: 30060
+    type: NodePort
