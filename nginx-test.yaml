@@ -54,5 +54,5 @@ spec:
         app: nginx-test-server
     ports:
         - port: 80
-          nodePort: 30060
+          nodePort: 32000
     type: NodePort
